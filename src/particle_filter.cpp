@@ -54,7 +54,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 }
 
 void ParticleFilter::prediction(double delta_t, double std_pos[], double velocity, double yaw_rate) {
-	// TODO: Add measurements to each particle and add random Gaussian noise.
+	// DONE: Add measurements to each particle and add random Gaussian noise.
 	// NOTE: When adding noise you may find std::normal_distribution and std::default_random_engine useful.
 	//  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
 	//  http://www.cplusplus.com/reference/random/default_random_engine/
@@ -82,19 +82,30 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
   std::normal_distribution<double> dist_y(0.0, std_pos[1]);     // This line creates a normal (Gaussian) distribution mean 0 for y.
   std::normal_distribution<double> dist_theta(0.0, std_pos[2]);   // This line creates a normal (Gaussian) distribution mean 0 for theta/bearing.
 
+  double noise_x;
+  double noise_y;
+  double noise_theta;
+
   // loop over particles in particles vector, update position, add noise
   for (int i = 0; i < particles.size(); i++) {
     
-    std::cout << particles[i].id << std::endl;                         // test code
+    // test code
+    std::cout << "Particle ID: " << particles[i].id << std::endl;                         
     std::cout << "Previous x, y, theta : " << particles[i].x << "," << particles[i].y << "," << particles[i].theta << std::endl;
 
-    // each particle has a current x,y location and bearing - so can use these in the bicycle motion model
+    // each particle has a current x,y and bearing - use these in the bicycle motion model, along with provided vel and yaw_rate
 
+    // get some noise values for this particle
+    noise_x = dist_x(gen);
+    noise_y = dist_y(gen);
+    noise_theta = dist_theta(gen);
+
+    // do the updates - bicycle calc for each, with noise added 
     double theta_f = particles[i].theta + (yaw_rate * delta_t);         // calculate the final theta value and retain (use again)
     double v_over_yaw = velocity / yaw_rate;                            // calcualte v/yaw term for calculations use
-    particles[i].x = particles[i].x + (v_over_yaw * (sin(theta_f) - sin(particles[i].theta)));    // x position calc
-    particles[i].y = particles[i].y + (v_over_yaw * (cos(particles[i].theta) - cos(theta_f)));    // y position calc
-    particles[i].theta = theta_f;                                                                 // update theta
+    particles[i].x = particles[i].x + (v_over_yaw * (sin(theta_f) - sin(particles[i].theta))) + noise_x;    // x position calc
+    particles[i].y = particles[i].y + (v_over_yaw * (cos(particles[i].theta) - cos(theta_f))) + noise_y;    // y position calc
+    particles[i].theta = theta_f + noise_theta;                                                             // update theta
 
     // test code
     std::cout << "Updated x, y, theta : " << particles[i].x << "," << particles[i].y << "," << particles[i].theta << std::endl;
