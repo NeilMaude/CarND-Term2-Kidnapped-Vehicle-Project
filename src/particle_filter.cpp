@@ -12,12 +12,45 @@
 
 #include "particle_filter.h"
 
+//using namespace std;
+
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
-	// TODO: Set the number of particles. Initialize all particles to first position (based on estimates of 
+	// DONE: Set the number of particles. Initialize all particles to first position (based on estimates of 
 	//   x, y, theta and their uncertainties from GPS) and all weights to 1. 
 	// Add random Gaussian noise to each particle.
 	// NOTE: Consult particle_filter.h for more information about this method (and others in this file).
 
+  // Test code
+  std::cout << "Initialise filter" << std::endl;
+  std::cout << "x     = " << x << std::endl;
+  std::cout << "y     = " << y << std::endl;
+  std::cout << "theta = " << theta << std::endl;
+  std::cout << "std[] = " << std[0] << "," << std[1] << "," << std[2] << std::endl;
+  // end of test code
+
+  std::default_random_engine gen;                               // create a random number engine                                                         
+  std::normal_distribution<double> dist_x(x, std[0]);           // This line creates a normal (Gaussian) distribution mean x.
+  std::normal_distribution<double> dist_y(y, std[1]);           // This line creates a normal (Gaussian) distribution mean y.
+  std::normal_distribution<double> dist_theta(theta, std[2]);   // This line creates a normal (Gaussian) distribution mean theta.
+
+  num_particles = 10;                                      // magic number of particles to start with
+  for (int i = 0; i < num_particles; i++) {
+    
+    // create and add a new particle
+
+    Particle particle;                                    // create a new particle structure
+    particle.id = i;                                      // set the ID value
+    particle.x = dist_x(gen);                             // create a x co-ordinate from the distribution
+    particle.y = dist_y(gen);                             // create a y co-ordinate from the distribution
+    particle.theta = dist_theta(gen);                     // create a bearing from the distribution
+    particle.weight = 1.0;                                // default to weight = 1
+
+    particles.push_back(particle);                        // add the particle to the particles vector
+
+  }
+  std::cout << "Number of particles created = " << particles.size() << std::endl;
+
+  is_initialized = true;                                  // initialisation complete
 }
 
 void ParticleFilter::prediction(double delta_t, double std_pos[], double velocity, double yaw_rate) {
@@ -25,6 +58,49 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
 	// NOTE: When adding noise you may find std::normal_distribution and std::default_random_engine useful.
 	//  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
 	//  http://www.cplusplus.com/reference/random/default_random_engine/
+
+  // Test code
+  std::cout << "Prediction step" << std::endl;
+  std::cout << "delta_t   = " << delta_t << std::endl;
+  std::cout << "velocity  = " << velocity << std::endl;
+  std::cout << "yaw_rate  = " << yaw_rate << std::endl;
+  std::cout << "std_pos[] = " << std_pos[0] << "," << std_pos[1] << "," << std_pos[2] << std::endl;
+  // end of test code
+  
+  /*
+    *** What elements of the calculation require sensor noise?  
+    3 standard deviations have been passed in std_pos[], which suggests adding noise to x,y,yaw
+    However, the noise is in the measurements (velocity over the ground, yaw rate), rather than
+    the final state.
+    Had to stare at this for a while to convince myself that adding noise after the position 
+    update is correct (rather than adding noise to the measurements ... but it's already in the
+    measurements and we just want the new state to reflect that uncertainty).
+  */
+
+  std::default_random_engine gen;                               // create a random number engine
+  std::normal_distribution<double> dist_x(0.0, std_pos[0]);     // This line creates a normal (Gaussian) distribution mean 0 for x.
+  std::normal_distribution<double> dist_y(0.0, std_pos[1]);     // This line creates a normal (Gaussian) distribution mean 0 for y.
+  std::normal_distribution<double> dist_theta(0.0, std_pos[2]);   // This line creates a normal (Gaussian) distribution mean 0 for theta/bearing.
+
+  // loop over particles in particles vector, update position, add noise
+  for (int i = 0; i < particles.size(); i++) {
+    
+    std::cout << particles[i].id << std::endl;                         // test code
+    std::cout << "Previous x, y, theta : " << particles[i].x << "," << particles[i].y << "," << particles[i].theta << std::endl;
+
+    // each particle has a current x,y location and bearing - so can use these in the bicycle motion model
+
+    double theta_f = particles[i].theta + (yaw_rate * delta_t);         // calculate the final theta value and retain (use again)
+    double v_over_yaw = velocity / yaw_rate;                            // calcualte v/yaw term for calculations use
+    particles[i].x = particles[i].x + (v_over_yaw * (sin(theta_f) - sin(particles[i].theta)));    // x position calc
+    particles[i].y = particles[i].y + (v_over_yaw * (cos(particles[i].theta) - cos(theta_f)));    // y position calc
+    particles[i].theta = theta_f;                                                                 // update theta
+
+    // test code
+    std::cout << "Updated x, y, theta : " << particles[i].x << "," << particles[i].y << "," << particles[i].theta << std::endl;
+
+  }
+  std::cout << std::endl;
 
 }
 

@@ -15,17 +15,33 @@
 
 using namespace std;
 
+#ifdef _WIN32
+#  include <direct.h>
+#  define getcwd _getcwd
+#  define chdir _chdir
+#else
+#  include <unistd.h>
+#endif
+const int MAXPATHLEN = 1000;
 
+std::string get_working_path()
+{
+  char temp[MAXPATHLEN];
+  return (getcwd(temp, MAXPATHLEN) ? std::string(temp) : std::string(""));
+}
 
 int main() {
 	
+  // NM debug code
+  //std::cout << get_working_path() << std::endl;
+  chdir("D:\Git\C++\CarND-Term2-Kidnapped-Vehicle-Project");      // NM this doesn't work!!!
+  std::cout << get_working_path() << std::endl;
+
 	// parameters related to grading.
 	int time_steps_before_lock_required = 100; // number of time steps before accuracy is checked by grader.
 	double max_runtime = 45; // Max allowable runtime to pass [sec]
 	double max_translation_error = 1; // Max allowable translation error to pass [m]
 	double max_yaw_error = 0.05; // Max allowable yaw error [rad]
-
-
 
 	// Start timer.
 	int start = clock();
