@@ -33,7 +33,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
   std::normal_distribution<double> dist_y(y, std[1]);           // This line creates a normal (Gaussian) distribution mean y.
   std::normal_distribution<double> dist_theta(theta, std[2]);   // This line creates a normal (Gaussian) distribution mean theta.
 
-  num_particles = 1000;                                      // magic number of particles to start with
+  num_particles = 100;                                      // magic number of particles to start with
   for (int i = 0; i < num_particles; i++) {
     
     // create and add a new particle
