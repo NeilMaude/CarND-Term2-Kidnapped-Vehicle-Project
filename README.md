@@ -1,13 +1,26 @@
 # Overview
 This repository contains all the code needed to complete the final project for the Localization course in Udacity's Self-Driving Car Nanodegree.
 
-#### Submission
-All you will submit is your completed version of `particle_filter.cpp`, which is located in the `src` directory. You should probably do a `git pull` before submitting to verify that your project passes the most up-to-date version of the grading code (there are some parameters in `src/main.cpp` which govern the requirements on accuracy and run time.)
-
 ## Project Introduction
-Your robot has been kidnapped and transported to a new location! Luckily it has a map of this location, a (noisy) GPS estimate of its initial location, and lots of (noisy) sensor and control data.
+This project implements a 2 dimensional particle filter in C++. The particle filter will be given a map and some initial localization information (analogous to what a GPS would provide). At each time step the filter will also get observation and control data. 
 
-In this project you will implement a 2 dimensional particle filter in C++. Your particle filter will be given a map and some initial localization information (analogous to what a GPS would provide). At each time step your filter will also get observation and control data. 
+## Notes on Solution
+The code implements the particle filter and meets the required accuracy and timing criteria.
+
+Note: the code uses 100 particles for the filter, which feels like a low number.
+
+With 100 particles, the test observation set completes in 18 seconds (Dell laptop, i7-6820).
+The accuracy (cumulative mean weighted error) is x=0.11373, y=0.107113, yaw=0.00379022.
+
+Re-running the code with 1000 particles (which takes 112 seconds), gives a slightly better result.
+The accuracy with 1000 particles becomes (CMWE): x=0.109336, y=0.0993035, yaw=0.00346569.
+
+However, the improvement in accuracy is: x=0.004394, y=0.0078095, yaw=0.00032453.
+
+So this increase in computation time (10x number of particles) gives a real world positional accuracy of less than 1cm.
+(The units of x and y are meters.)  Yaw is in radians, but the improvement is fractions of a degree of orientation accuracy.
+
+This indicates that there is no value from increasing the number of particles used by the filter.
 
 ## Running the Code
 Once you have this repository on your machine, `cd` into the repository's root directory and run the following commands from the command line:
@@ -75,9 +88,9 @@ root
     |   particle_filter.h
 ```
 
-The only file you should modify is `particle_filter.cpp` in the `src` directory. The file contains the scaffolding of a `ParticleFilter` class and some associated methods. Read through the code, the comments, and the header file `particle_filter.h` to get a sense for what this code is expected to do.
+The code for the particle filter is in `particle_filter.cpp` in the `src` directory. 
 
-If you are interested, take a look at `src/main.cpp` as well. This file contains the code that will actually be running your particle filter and calling the associated methods.
+The `src/main.cpp` file contains the code that will actually be running your particle filter and calling the associated methods.
 
 ## Inputs to the Particle Filter
 You can find the inputs to the particle filter in the `data` directory. 
@@ -104,12 +117,9 @@ These files contain observation data for all "observable" landmarks. Here observ
 2. y distance to the landmark in meters (forward is positive) RELATIVE TO THE VEHICLE.
 
 > **NOTE**
-> The vehicle's coordinate system is NOT the map coordinate system. Your 
-> code will have to handle this transformation.
+> The vehicle's coordinate system is NOT the map coordinate system. 
 
 ## Success Criteria
-If your particle filter passes the current grading code (you can make sure you have the current version at any time by doing a `git pull`), then you should pass! 
-
 The two things the grading code is looking for are:
 
 1. **Accuracy**: your particle filter should localize vehicle position and yaw to within the values specified in the parameters `max_translation_error` (maximum allowed error in x or y) and `max_yaw_error` in `src/main.cpp`.
