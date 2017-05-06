@@ -295,8 +295,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     particles[i].weight = new_weight;
 
     // test code
-    std::cout << "Updated weight : " << particles[i].weight << std::endl;
+    std::cout << "Particle #" << i << ", Updated weight : " << particles[i].weight << std::endl;
     // end of test code
+
+    // Note: the p_xy terms can be very small for unlikely observations
 
   }
 
@@ -316,6 +318,16 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
       // end test code
     }
   }
+  else {
+    // zero normaliser - all particle weights must have collapsed to zero...
+    // test code
+    std::cout << "All particles have zero weight!" << std::endl;
+    // end of test code
+    
+    // might want to set all of the particle weights to the uniform distribution here (i.e. max uncertainty)?
+
+  }
+  
 }
 
 
