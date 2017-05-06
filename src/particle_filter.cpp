@@ -33,7 +33,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
   std::normal_distribution<double> dist_y(y, std[1]);           // This line creates a normal (Gaussian) distribution mean y.
   std::normal_distribution<double> dist_theta(theta, std[2]);   // This line creates a normal (Gaussian) distribution mean theta.
 
-  num_particles = 1;                                      // magic number of particles to start with
+  num_particles = 1000;                                      // magic number of particles to start with
   for (int i = 0; i < num_particles; i++) {
     
     // create and add a new particle
@@ -106,7 +106,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
 
     // do the updates - bicycle calc for each, with noise added 
     double theta_f = particles[i].theta + (yaw_rate * delta_t);         // calculate the final theta value and retain (use again)
-    double v_over_yaw = velocity / yaw_rate;                            // calcualte v/yaw term for calculations use
+    double v_over_yaw = velocity / yaw_rate;                            // calculate v/yaw term for calculations use
     particles[i].x = particles[i].x + (v_over_yaw * (sin(theta_f) - sin(particles[i].theta))) + noise_x;    // x position calc
     particles[i].y = particles[i].y + (v_over_yaw * (cos(particles[i].theta) - cos(theta_f))) + noise_y;    // y position calc
     particles[i].theta = theta_f + noise_theta;                                                             // update theta
@@ -230,7 +230,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
       LandmarkObs new_p;
       new_p.id = observations[j].id;                                                              // Although .id is not initialised yet...
       new_p.x = particle_x + (observations[j].x * cos_theta) - (observations[j].y * sin_theta);   // ignoring the "swap sign" in the comments
-      new_p.y = particle_y + (observations[j].y * sin_theta) + (observations[j].y * cos_theta);
+      new_p.y = particle_y + (observations[j].x * sin_theta) + (observations[j].y * cos_theta);
       obs_map.push_back(new_p);                                                                   // put this observation on the obs_map vector
 
       /*
@@ -303,7 +303,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     double sigma_y_sq_2 = sigma_y * sigma_y * 2.0;                // will use this a lot
     double denom_term = 1.0 / (2 * M_PI * sigma_x * sigma_y);     // ditto
 
-    double new_weight = 1.0;
+    double new_weight = 1.0; // particles[i].weight; // 1.0;
 
     for (int j = 0; j < obs_map.size(); j++) {
 
