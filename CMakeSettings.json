@@ -5,7 +5,7 @@
         "name": "x86-Debug",
         "generator": "Visual Studio 15 2017",
         "configurationType": "Debug",
-        "buildRoot": "${projectDir}\\build\\${name}",
+        "buildRoot": "D:\\build\\${name}",
         "cmakeCommandArgs": "",
         "buildCommandArgs": "-m -v:minimal"
       },

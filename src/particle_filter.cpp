@@ -139,7 +139,8 @@ void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::ve
   // for each observation, scan over the landmarks and see which is the nearest
   for (int i = 0; i < observations.size(); i++) {
 
-    double best_distance = DBL_MAX;
+    double best_distance = 1.0E10; //DBL_MAX;
+                                    // Fix up for Udacity grading process - DBL_MAX not available in that environment
     
     /*
     // test code
